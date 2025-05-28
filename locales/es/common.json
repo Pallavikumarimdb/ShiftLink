@@ -1,0 +1,170 @@
+{
+  "site": {
+    "name": "ShiftLink",
+    "tagline": "Conectando estudiantes con oportunidades a tiempo parcial"
+  },
+  "nav": {
+    "home": "Inicio",
+    "jobs": "Empleos",
+    "employers": "Empleadores",
+    "about": "Acerca de",
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "dashboard": "Panel",
+    "profile": "Perfil",
+    "applications": "Solicitudes",
+    "logout": "Cerrar sesión"
+  },
+  "hero": {
+    "title": "Encuentra tu trabajo ideal a tiempo parcial",
+    "subtitle": "Conéctate con empleadores locales que buscan talento estudiantil",
+    "cta": "Buscar empleos",
+    "employer_cta": "Publicar empleo"
+  },
+  "features": {
+    "title": "Por qué elegir ShiftLink",
+    "subtitle": "La mejor plataforma para que estudiantes y empleadores se conecten",
+    "feature1_title": "Horarios flexibles",
+    "feature1_desc": "Encuentra trabajos que se adapten a tu horario de clases",
+    "feature2_title": "Empleadores verificados",
+    "feature2_desc": "Todos los empleadores están verificados para tu seguridad",
+    "feature3_title": "Solicitudes rápidas",
+    "feature3_desc": "Solicita múltiples trabajos con solo unos clics",
+    "feature4_title": "Gana experiencia",
+    "feature4_desc": "Obtén valiosa experiencia laboral mientras estudias"
+  },
+  "how_it_works": {
+    "title": "Cómo funciona",
+    "subtitle": "Pasos simples para encontrar tu próximo trabajo",
+    "step1_title": "Crear perfil",
+    "step1_desc": "Regístrate y completa tu perfil de estudiante",
+    "step2_title": "Explorar empleos",
+    "step2_desc": "Busca trabajos que coincidan con tus habilidades y horario",
+    "step3_title": "Solicitar",
+    "step3_desc": "Envía solicitudes a los trabajos que te interesen",
+    "step4_title": "Ser contratado",
+    "step4_desc": "Entrevista y comienza a trabajar según tu horario"
+  },
+  "testimonials": {
+    "title": "Historias de éxito",
+    "subtitle": "Escucha a estudiantes y empleadores que usan ShiftLink"
+  },
+  "footer": {
+    "about": "Sobre nosotros",
+    "contact": "Contacto",
+    "privacy": "Política de privacidad",
+    "terms": "Términos de servicio",
+    "copyright": "© 2023 ShiftLink. Todos los derechos reservados."
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "name": "Nombre",
+    "student": "Estudiante",
+    "employer": "Empleador",
+    "company_name": "Nombre de la empresa",
+    "already_account": "¿Ya tienes una cuenta?",
+    "no_account": "¿No tienes una cuenta?"
+  },
+  "jobs": {
+    "search": "Buscar",
+    "location": "Ubicación",
+    "hourly_rate": "Tarifa por hora",
+    "hours_per_week": "Horas por semana",
+    "apply": "Solicitar",
+    "applied": "Solicitado",
+    "post_job": "Publicar empleo",
+    "job_details": "Detalles del empleo",
+    "requirements": "Requisitos",
+    "shift_times": "Horarios de turno",
+    "posted_on": "Publicado el",
+    "about_employer": "Acerca del empleador"
+  },
+  "applications": {
+    "my_applications": "Mis solicitudes",
+    "status": "Estado",
+    "pending": "Pendiente",
+    "approved": "Aprobado",
+    "rejected": "Rechazado",
+    "completed": "Completado",
+    "applied_on": "Solicitado el",
+    "notes": "Notas",
+    "view_job": "Ver empleo"
+  },
+  "employer": {
+    "dashboard": "Panel del empleador",
+    "my_jobs": "Mis empleos",
+    "applicants": "Solicitantes",
+    "completed_jobs": "Trabajos completados",
+    "post_job": "Publicar empleo",
+    "view_applicants": "Ver solicitantes",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "mark_completed": "Marcar como completado",
+    "verification": "Verificarse",
+    "verification_status": "Estado de verificación"
+  },
+  "student": {
+    "dashboard": "Panel del estudiante",
+    "find_jobs": "Buscar empleos",
+    "my_applications": "Mis solicitudes",
+    "completed_jobs": "Trabajos completados",
+    "edit_profile": "Editar perfil"
+  },
+  "admin": {
+    "dashboard": "Panel de administración",
+    "employers": "Empleadores",
+    "students": "Estudiantes",
+    "jobs": "Empleos",
+    "applications": "Solicitudes",
+    "reviews": "Reseñas",
+    "verification": "Solicitudes de verificación",
+    "analytics": "Analíticas",
+    "settings": "Configuración",
+    "flagged_employers": "Empleadores marcados",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "unflag": "Quitar marca"
+  },
+  "reviews": {
+    "leave_review": "Dejar reseña",
+    "edit_review": "Editar reseña",
+    "rating": "Calificación",
+    "comment": "Comentario",
+    "submit": "Enviar reseña"
+  },
+  "profile": {
+    "edit_profile": "Editar perfil",
+    "save": "Guardar cambios",
+    "personal_info": "Información personal",
+    "education": "Educación",
+    "experience": "Experiencia",
+    "skills": "Habilidades",
+    "availability": "Disponibilidad",
+    "company_info": "Información de la empresa"
+  },
+  "language": {
+    "select": "Seleccionar idioma",
+    "en": "Inglés",
+    "es": "Español",
+    "fr": "Francés",
+    "de": "Alemán",
+    "zh": "Chino",
+    "ja": "Japonés"
+  },
+  "country": {
+    "select": "Seleccionar país",
+    "US": "Estados Unidos",
+    "CA": "Canadá",
+    "MX": "México",
+    "GB": "Reino Unido",
+    "ES": "España",
+    "FR": "Francia",
+    "DE": "Alemania",
+    "CN": "China",
+    "JP": "Japón",
+    "AU": "Australia"
+  }
+}

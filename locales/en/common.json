@@ -1,0 +1,170 @@
+{
+  "site": {
+    "name": "ShiftLink",
+    "tagline": "Connecting students with part-time opportunities"
+  },
+  "nav": {
+    "home": "Home",
+    "jobs": "Jobs",
+    "employers": "Employers",
+    "about": "About",
+    "login": "Login",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "applications": "Applications",
+    "logout": "Logout"
+  },
+  "hero": {
+    "title": "Find Your Perfect Part-Time Job",
+    "subtitle": "Connect with local employers looking for student talent",
+    "cta": "Find Jobs",
+    "employer_cta": "Post a Job"
+  },
+  "features": {
+    "title": "Why Choose ShiftLink",
+    "subtitle": "The best platform for students and employers to connect",
+    "feature1_title": "Flexible Schedules",
+    "feature1_desc": "Find jobs that fit around your class schedule",
+    "feature2_title": "Verified Employers",
+    "feature2_desc": "All employers are verified for your safety",
+    "feature3_title": "Quick Applications",
+    "feature3_desc": "Apply to multiple jobs with just a few clicks",
+    "feature4_title": "Build Experience",
+    "feature4_desc": "Gain valuable work experience while studying"
+  },
+  "how_it_works": {
+    "title": "How It Works",
+    "subtitle": "Simple steps to find your next job",
+    "step1_title": "Create Profile",
+    "step1_desc": "Sign up and complete your student profile",
+    "step2_title": "Browse Jobs",
+    "step2_desc": "Search for jobs that match your skills and schedule",
+    "step3_title": "Apply",
+    "step3_desc": "Submit applications to jobs you're interested in",
+    "step4_title": "Get Hired",
+    "step4_desc": "Interview and start working on your schedule"
+  },
+  "testimonials": {
+    "title": "Success Stories",
+    "subtitle": "Hear from students and employers who use ShiftLink"
+  },
+  "footer": {
+    "about": "About Us",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "copyright": "© 2023 ShiftLink. All rights reserved."
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "student": "Student",
+    "employer": "Employer",
+    "company_name": "Company Name",
+    "already_account": "Already have an account?",
+    "no_account": "Don't have an account?"
+  },
+  "jobs": {
+    "search": "Search",
+    "location": "Location",
+    "hourly_rate": "Hourly Rate",
+    "hours_per_week": "Hours per Week",
+    "apply": "Apply",
+    "applied": "Applied",
+    "post_job": "Post a Job",
+    "job_details": "Job Details",
+    "requirements": "Requirements",
+    "shift_times": "Shift Times",
+    "posted_on": "Posted on",
+    "about_employer": "About the Employer"
+  },
+  "applications": {
+    "my_applications": "My Applications",
+    "status": "Status",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "completed": "Completed",
+    "applied_on": "Applied on",
+    "notes": "Notes",
+    "view_job": "View Job"
+  },
+  "employer": {
+    "dashboard": "Employer Dashboard",
+    "my_jobs": "My Jobs",
+    "applicants": "Applicants",
+    "completed_jobs": "Completed Jobs",
+    "post_job": "Post a Job",
+    "view_applicants": "View Applicants",
+    "approve": "Approve",
+    "reject": "Reject",
+    "mark_completed": "Mark as Completed",
+    "verification": "Get Verified",
+    "verification_status": "Verification Status"
+  },
+  "student": {
+    "dashboard": "Student Dashboard",
+    "find_jobs": "Find Jobs",
+    "my_applications": "My Applications",
+    "completed_jobs": "Completed Jobs",
+    "edit_profile": "Edit Profile"
+  },
+  "admin": {
+    "dashboard": "Admin Dashboard",
+    "employers": "Employers",
+    "students": "Students",
+    "jobs": "Jobs",
+    "applications": "Applications",
+    "reviews": "Reviews",
+    "verification": "Verification Requests",
+    "analytics": "Analytics",
+    "settings": "Settings",
+    "flagged_employers": "Flagged Employers",
+    "approve": "Approve",
+    "reject": "Reject",
+    "unflag": "Unflag"
+  },
+  "reviews": {
+    "leave_review": "Leave Review",
+    "edit_review": "Edit Review",
+    "rating": "Rating",
+    "comment": "Comment",
+    "submit": "Submit Review"
+  },
+  "profile": {
+    "edit_profile": "Edit Profile",
+    "save": "Save Changes",
+    "personal_info": "Personal Information",
+    "education": "Education",
+    "experience": "Experience",
+    "skills": "Skills",
+    "availability": "Availability",
+    "company_info": "Company Information"
+  },
+  "language": {
+    "select": "Select Language",
+    "en": "English",
+    "es": "Spanish",
+    "fr": "French",
+    "de": "German",
+    "zh": "Chinese",
+    "ja": "Japanese"
+  },
+  "country": {
+    "select": "Select Country",
+    "US": "United States",
+    "CA": "Canada",
+    "MX": "Mexico",
+    "GB": "United Kingdom",
+    "ES": "Spain",
+    "FR": "France",
+    "DE": "Germany",
+    "CN": "China",
+    "JP": "Japan",
+    "AU": "Australia"
+  }
+}

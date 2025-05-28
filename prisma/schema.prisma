@@ -1,0 +1,298 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model - base for all user types
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String // Hashed password
+  role          UserRole  @default(STUDENT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  emailVerified DateTime?
+  image         String?
+  country       String    @default("US")
+  language      String    @default("en")
+
+  // Relations based on role
+  student       Student?
+  employer      Employer?
+  admin         Admin?
+  
+  // Chat history
+  chatSessions  ChatSession[]
+}
+
+enum UserRole {
+  STUDENT
+  EMPLOYER
+  ADMIN
+}
+
+// Student profile
+model Student {
+  id             String        @id @default(cuid())
+  userId         String        @unique
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio            String?
+  school         String?
+  major          String?
+  graduationYear Int?
+  skills         String?
+  availability   String?
+  resume         String? // URL to resume file
+  applications   Application[]
+  reviews        Review[]      @relation("StudentReviews")
+  
+  // New fields for Phase 2
+  visaType       String?
+  visaExpiryDate DateTime?
+  workHoursLimit Int?          @default(20) // Default work hours limit for international students
+  studentIdCard  String?       // URL to uploaded student ID card
+  verifiedStatus Boolean       @default(false)
+  
+  // AI-generated content
+  generatedResume String?
+  jobPreferences  Json?        // Stored as JSON
+}
+
+// Employer profile
+model Employer {
+  id                  String               @id @default(cuid())
+  userId              String               @unique
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName         String
+  industry            String?
+  website             String?
+  description         String?
+  logo                String? // URL to logo file
+  isVerified          Boolean              @default(false)
+  isFlagged           Boolean              @default(false)
+  flagReason          String?
+  jobs                Job[]
+  verificationRequest VerificationRequest?
+  reviews             Review[]             @relation("EmployerReviews")
+  
+  // New fields for Phase 2
+  businessRegistrationNumber String?
+  taxIdentificationNumber   String?
+  complianceStatus          ComplianceStatus @default(PENDING)
+  complianceNotes           String?
+}
+
+enum ComplianceStatus {
+  PENDING
+  COMPLIANT
+  NON_COMPLIANT
+  EXEMPTED
+}
+
+// Admin profile
+model Admin {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  level  Int    @default(1) // Admin level for different permissions
+}
+
+// Job postings
+model Job {
+  id           String        @id @default(cuid())
+  title        String
+  location     String
+  description  String
+  requirements String?
+  hourlyRate   Float
+  hoursPerWeek Int
+  shiftTimes   String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  employerId   String
+  employer     Employer      @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  applications Application[]
+  isPremium    Boolean       @default(false)
+  isActive     Boolean       @default(true)
+  country      String        @default("US")
+  
+  // New fields for Phase 2
+  aiSummary    String?       // AI-generated summary
+  visaCompliant Boolean      @default(true) // Whether this job complies with visa regulations
+  skillTags    String[]      // Array of skills required for matching
+  categoryTags String[]      // Job categories for filtering
+}
+
+// Job applications
+model Application {
+  id          String    @id @default(cuid())
+  jobId       String
+  job         Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  studentId   String
+  student     Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status      AppStatus @default(PENDING)
+  appliedAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  notes       String?
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+  review      Review?
+  
+  // New fields for Phase 2
+  aiMatchScore Float?    // AI-calculated match score
+  aiMatchReason String?  // Explanation of the match
+}
+
+enum AppStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Reviews after job completion
+model Review {
+  id                String      @id @default(cuid())
+  applicationId     String      @unique
+  application       Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  studentId         String
+  student           Student     @relation("StudentReviews", fields: [studentId], references: [id], onDelete: Cascade)
+  employerId        String
+  employer          Employer    @relation("EmployerReviews", fields: [employerId], references: [id], onDelete: Cascade)
+  studentRating     Float?
+  studentComment    String?
+  studentReviewedAt DateTime?
+  employerRating    Float?
+  employerComment   String?
+  employerReviewedAt DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  isFlagged         Boolean     @default(false)
+  flagReason        String?
+  
+  // New fields for Phase 2
+  sentimentScore    Float?      // AI-calculated sentiment score (-1 to 1)
+  sentimentAnalysis Json?       // Detailed sentiment analysis
+}
+
+// Employer verification requests
+model VerificationRequest {
+  id                    String               @id @default(cuid())
+  employerId            String               @unique
+  employer              Employer             @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  status                VerificationStatus   @default(PENDING)
+  submittedAt           DateTime             @default(now())
+  reviewedAt            DateTime?
+  reviewedBy            String?
+  businessLicense       String?
+  taxId                 String?
+  verificationDocuments String[] // Array of document URLs
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Subscription plans
+model Subscription {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  plan         String
+  startDate    DateTime @default(now())
+  endDate      DateTime
+  isActive     Boolean  @default(true)
+  paymentId    String?
+  paymentMethod String?
+}
+
+// Analytics data
+model Analytics {
+  id            String   @id @default(cuid())
+  date          DateTime @default(now())
+  newStudents   Int      @default(0)
+  newEmployers  Int      @default(0)
+  newJobs       Int      @default(0)
+  applications  Int      @default(0)
+  completedJobs Int      @default(0)
+  country       String   @default("global")
+}
+
+// System settings
+model Settings {
+  id                String @id @default(cuid())
+  key               String @unique
+  value             String
+  description       String?
+  lastModifiedBy    String?
+  lastModifiedAt    DateTime @default(now())
+}
+
+// New models for Phase 2
+
+// Visa compliance rules by country
+model VisaComplianceRule {
+  id                  String @id @default(cuid())
+  country             String
+  visaType            String
+  maxWorkHoursPerWeek Int
+  restrictions        String?
+  additionalNotes     String?
+  
+  @@unique([country, visaType])
+}
+
+// Chat sessions for the AI chatbot
+model ChatSession {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  messages  ChatMessage[]
+}
+
+// Individual chat messages
+model ChatMessage {
+  id            String      @id @default(cuid())
+  sessionId     String
+  session       ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  content       String
+  role          String      // "user" or "assistant"
+  createdAt     DateTime    @default(now())
+  
+  @@index([sessionId])
+}
+
+// Document verification
+model DocumentVerification {
+  id            String      @id @default(cuid())
+  userId        String      @unique
+  documentType  String      // "student_id", "visa", "passport", etc.
+  documentUrl   String      // URL to the uploaded document
+  status        VerificationStatus @default(PENDING)
+  submittedAt   DateTime    @default(now())
+  verifiedAt    DateTime?
+  verifiedBy    String?
+  notes         String?
+}
+
+// Terms of service acceptance
+model TermsAcceptance {
+  id            String      @id @default(cuid())
+  userId        String
+  termsVersion  String
+  acceptedAt    DateTime    @default(now())
+  ipAddress     String?
+  userAgent     String?
+  
+  @@unique([userId, termsVersion])
+}

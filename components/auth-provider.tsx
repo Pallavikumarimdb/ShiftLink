@@ -63,7 +63,6 @@ const [isSubmitting, setIsSubmitting] = useState(false)
     const isAdminProtected = adminProtectedRoutes.some((route) => pathname?.startsWith(route))
     const isAuthRoute = authRoutes.some((route) => pathname?.startsWith(route))
 
-    console.log("useEffect auth check", { user, pathname, isAuthLoading })
 
     if (!user && (isStudentProtected || isEmployerProtected || isAdminProtected)) {
       router.push("/login")

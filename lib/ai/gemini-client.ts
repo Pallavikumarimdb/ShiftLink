@@ -1,16 +1,14 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import { generateText } from "ai"
 
-// Initialize the Google Generative AI client
+
 const geminiClient = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY!,
 });
-// Default model to use
+
 const DEFAULT_MODEL = "gemini-1.5-flash"
 
-/**
- * Generate text using Gemini model
- */
+
 export async function generateGeminiText(prompt: string, systemPrompt?: string) {
   try {
     const { text } = await generateText({
@@ -29,9 +27,7 @@ export async function generateGeminiText(prompt: string, systemPrompt?: string) 
   }
 }
 
-/**
- * Generate a resume based on user input
- */
+
 export async function generateResume(userData: {
   name: string
   education: string
@@ -67,9 +63,7 @@ export async function generateResume(userData: {
   return generateGeminiText(prompt, systemPrompt)
 }
 
-/**
- * Summarize a job description
- */
+
 export async function summarizeJobDescription(jobDescription: string) {
   const systemPrompt = `
     You are an expert at summarizing job descriptions for busy students.
@@ -93,9 +87,7 @@ export async function summarizeJobDescription(jobDescription: string) {
   return generateGeminiText(prompt, systemPrompt)
 }
 
-/**
- * Generate personalized job recommendations
- */
+
 export async function generateJobRecommendations(
   studentProfile: {
     skills: string
@@ -150,9 +142,7 @@ export async function generateJobRecommendations(
   return generateGeminiText(prompt, systemPrompt)
 }
 
-/**
- * Analyze sentiment of a review
- */
+
 export async function analyzeSentiment(reviewText: string) {
   const systemPrompt = `
     You are an expert at analyzing sentiment in text.

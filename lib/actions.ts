@@ -6,10 +6,10 @@ import { redirect } from "next/navigation"
 import { hash } from "bcryptjs"
 import { db } from "@/lib/db"
 
-// Define UserRole type or import it from your models/types
+
 type UserRole = "STUDENT" | "EMPLOYER"
 
-// Register a new user
+
 export async function registerUser(formData: FormData) {
   try {
     const name = formData.get("name") as string
@@ -24,7 +24,7 @@ export async function registerUser(formData: FormData) {
       }
     }
 
-    // Check if user already exists
+ 
     const existingUser = await db.user.findUnique({
       where: {
         email,
@@ -37,7 +37,7 @@ export async function registerUser(formData: FormData) {
       }
     }
 
-    // Hash password
+
     const hashedPassword = await hash(password, 10)
 
     // Create user transaction
@@ -88,7 +88,7 @@ export async function registerUser(formData: FormData) {
   }
 }
 
-// Post a new job
+
 export async function postJob(formData: FormData) {
   try {
     const title = formData.get("title") as string
@@ -108,7 +108,7 @@ export async function postJob(formData: FormData) {
       }
     }
 
-    // Create the job
+
     const job = await db.job.create({
       data: {
         title,
@@ -139,7 +139,6 @@ export async function postJob(formData: FormData) {
   }
 }
 
-// Apply for a job
 export async function applyForJob(formData: FormData) {
   try {
     const jobId = formData.get("jobId") as string
@@ -152,7 +151,7 @@ export async function applyForJob(formData: FormData) {
       }
     }
 
-    // Check if job exists
+
     const job = await db.job.findUnique({
       where: {
         id: jobId,
@@ -165,7 +164,6 @@ export async function applyForJob(formData: FormData) {
       }
     }
 
-    // Check if student has already applied
     const existingApplication = await db.application.findFirst({
       where: {
         jobId,
@@ -179,7 +177,7 @@ export async function applyForJob(formData: FormData) {
       }
     }
 
-    // Create the application
+
     const application = await db.application.create({
       data: {
         jobId,
@@ -203,7 +201,7 @@ export async function applyForJob(formData: FormData) {
   }
 }
 
-type AppStatus = "PENDING" | "APPROVED" | "REJECTED"; // or whatever strings you're using
+type AppStatus = "PENDING" | "APPROVED" | "REJECTED"; 
 
 export async function updateApplicationStatus(formData: FormData) {
   try {
@@ -285,7 +283,6 @@ export async function completeApplication(formData: FormData) {
   }
 }
 
-// Submit a review
 export async function submitReview(formData: FormData) {
   try {
     const applicationId = formData.get("applicationId") as string
@@ -299,7 +296,6 @@ export async function submitReview(formData: FormData) {
       }
     }
 
-    // Check if application exists and is completed
     const application = await db.application.findUnique({
       where: {
         id: applicationId,

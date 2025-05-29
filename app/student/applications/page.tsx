@@ -58,7 +58,6 @@ export default function StudentApplicationsPage() {
   const fetchApplications = async () => {
     try {
       setIsLoading(true)
-      console.log("Fetching applications for student:", user?.id)
       
       const res = await fetch(`/api/applications?studentId=${user?.id}`, {
         method: 'GET',
@@ -74,7 +73,6 @@ export default function StudentApplicationsPage() {
       }
 
       const data = await res.json()
-      console.log("Received applications:", data)
       
       if (!Array.isArray(data)) {
         console.error("Invalid response format:", data)

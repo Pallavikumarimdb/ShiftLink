@@ -1,9 +1,6 @@
 import { generateText, streamText } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { google } from '@ai-sdk/google';
 
-
-console.log("GEMINI_API_KEY loaded:", process.env.GEMINI_API_KEY);
 
 const gemini = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY!,
@@ -31,9 +28,7 @@ Important guidelines:
 The ShiftLink platform helps international students find part-time retail and odd jobs while studying abroad.
 `;
 
-/**
- * Generate a chatbot response
- */
+
 export async function generateChatbotResponse(
   messages: Array<{ role: "user" | "assistant"; content: string }>,
   language = "en"
@@ -48,7 +43,7 @@ export async function generateChatbotResponse(
     > = [{ role: "system", content: fullSystemPrompt }, ...messages];
 
     const { text } = await generateText({
-      model: gemini(DEFAULT_MODEL), // ✅ CORRECT,
+      model: gemini(DEFAULT_MODEL), 
       messages: aiMessages,
     });
 
@@ -63,9 +58,7 @@ export async function generateChatbotResponse(
 }
 
 
-/**
- * Stream a chatbot response
- */
+
 export async function streamChatbotResponse(
   messages: Array<{ role: "user" | "assistant"; content: string }>,
   language = "en",
@@ -82,7 +75,7 @@ export async function streamChatbotResponse(
     ];
 
     const result = streamText({
-      model: gemini(DEFAULT_MODEL), // ✅ CORRECT,
+      model: gemini(DEFAULT_MODEL), 
       messages: aiMessages,
       onFinish: (_res) => {
         console.log("Streaming complete.");

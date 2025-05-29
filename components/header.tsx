@@ -65,7 +65,6 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-8">
-          <ModeToggle />
 
           {isLoading ? (
             <div className="h-10 w-20 rounded-md bg-muted animate-pulse"></div>

@@ -14,7 +14,7 @@ export async function getSessionWithRole(requiredRole?: string | string[]) {
     const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole]
 
     if (!roles.includes(session.user.role)) {
-      // Redirect to appropriate dashboard based on role
+  
       switch (session.user.role) {
         case "STUDENT":
           redirect("/student/dashboard")
@@ -31,13 +31,13 @@ export async function getSessionWithRole(requiredRole?: string | string[]) {
   return session
 }
 
-// Check if user is authenticated
+
 export async function isAuthenticated() {
   const session = await getServerSession(authOptions)
   return !!session
 }
 
-// Get user role
+
 export async function getUserRole() {
   const session = await getServerSession(authOptions)
   return session?.user.role || null

@@ -96,11 +96,11 @@ export default function EmployerDashboard() {
 
   const fetchCompletedApplications = async () => {
     if (!session?.user?.employerId) return
-    console.log("Fetching completed applications for employer:", session.user.employerId)
+
     const res = await fetch(`/api/applications?isCompleted=true&employerId=${session.user.employerId}`)
     if (res.ok) {
       const data: CompletedApplication[] = await res.json()
-      console.log("Completed applications data:", data)
+
       setCompletedApplications(data)
     } else {
       console.error("Failed to fetch completed applications:", await res.text())
@@ -109,11 +109,11 @@ export default function EmployerDashboard() {
 
   const fetchRecentApplications = async () => {
     if (!session?.user?.employerId) return
-    console.log("Fetching recent applications for employer:", session.user.employerId)
+
     const res = await fetch(`/api/applications?employerId=${session.user.employerId}`)
     if (res.ok) {
       const data: RecentApplication[] = await res.json()
-      console.log("Recent applications data:", data)
+
       setRecentApplications(data)
     } else {
       console.error("Failed to fetch recent applications:", await res.text())
@@ -125,7 +125,7 @@ export default function EmployerDashboard() {
     if (res.ok) {
       const data: Application[] = await res.json()
       setApplications(data)
-      console.log("fetchApplications", data.map(app => app.status))
+
     }
   }
 

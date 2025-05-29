@@ -90,12 +90,10 @@ export default function StudentDashboardPage() {
 
     if (user) {
       const fetchApplications = async () => {
-        console.log("Fetching applications for student:", user?.id)
-        const res = await fetch(`/api/applications`)
+        const res = await fetch(`/api/applications?studentId=${user?.id}`)
         if (res.ok) {
           const data: Application[] = await res.json()
-          console.log(data)
-          setAppliedJobs(data.filter(app => !app.isCompleted))
+          setAppliedJobs(data)
           setCompletedJobs(data.filter(app => app.isCompleted))
         } else {
           setAppliedJobs([])

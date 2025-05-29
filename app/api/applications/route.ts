@@ -6,7 +6,6 @@ import prisma from "@/lib/prisma"
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions)
-    console.log("Session user:", session?.user)
 
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -19,8 +18,6 @@ export async function GET(req: Request) {
     const status = url.searchParams.get("status")
     const isCompleted = url.searchParams.get("isCompleted")
 
-    console.log("Query params:", { studentIdParam, jobId, employerId, status, isCompleted })
-
     const filter: any = {}
 
     // STUDENT: see only own applications
@@ -30,14 +27,12 @@ export async function GET(req: Request) {
 
     // EMPLOYER: handle different filtering scenarios
     if (session.user.role === "EMPLOYER") {
-      console.log("Processing employer request")
       // If employerId is specified and matches current user, or no employerId specified
       if (!employerId || employerId === session.user.employerId) {
         const employerJobs = await prisma.job.findMany({
           where: { employerId: session.user.employerId },
           select: { id: true },
         })
-        console.log("Found employer jobs:", employerJobs)
 
         const jobIds = employerJobs.map((job) => job.id)
         filter.jobId = { in: jobIds }
@@ -64,8 +59,6 @@ export async function GET(req: Request) {
       filter.isCompleted = isCompleted === "true"
     }
 
-    console.log("Final filter:", filter)
-
     const applications = await prisma.application.findMany({
       where: filter,
       include: {
@@ -83,6 +76,10 @@ export async function GET(req: Request) {
                 },
               },
             },
+            location: true,
+            hourlyRate: true,
+            hoursPerWeek: true,
+            shiftTimes: true,
           },
         },
         student: {
@@ -102,8 +99,6 @@ export async function GET(req: Request) {
       },
     })
 
-    console.log("Found applications:", applications.length)
-
     const formattedApplications = applications.map((app) => {
       const baseApplication = {
         id: app.id,
@@ -117,6 +112,10 @@ export async function GET(req: Request) {
         isCompleted: app.isCompleted,
         completedAt: app.completedAt,
         jobTitle: app.job.title, // Always include job title
+        hourlyRate: app.job.hourlyRate,
+        hoursPerWeek: app.job.hoursPerWeek,
+        shiftTimes: app.job.shiftTimes,
+        location: app.job.location,
       }
 
       // For completed applications, include review status
@@ -135,6 +134,10 @@ export async function GET(req: Request) {
           title: app.job.title,
           employerId: app.job.employerId,
           employerName: app.job.employer.user.name,
+          hourlyRate: app.job.hourlyRate,
+          hoursPerWeek: app.job.hoursPerWeek,
+          shiftTimes: app.job.shiftTimes,
+          location: app.job.location,
         },
         student: {
           id: app.student.id,
@@ -193,7 +196,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "You have already applied for this job" }, { status: 400 })
     }
 
-  
+
     const application = await prisma.application.create({
       data: {
         jobId,

@@ -334,7 +334,6 @@ export default function StudentProfilePage() {
         throw new Error('Failed to update availability')
       }
 
-      console.log('Availability updated successfully')
     } catch (err) {
       console.error('Availability update error:', err)
     }

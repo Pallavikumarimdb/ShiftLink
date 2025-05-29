@@ -4,13 +4,14 @@ import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 
 interface RouteParams {
-  params: Promise<{ id: string }>
+  params: { id: string }
 }
+
 
 export async function GET(req: Request, { params }: RouteParams) {
   try {
     const session = await getServerSession(authOptions)
-    const { id: applicationId } = await params
+    const { id: applicationId } = params
 
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -100,7 +101,7 @@ export async function GET(req: Request, { params }: RouteParams) {
 export async function PATCH(req: Request, { params }: RouteParams) {
   try {
     const session = await getServerSession(authOptions)
-    const { id: applicationId } = await params
+    const { id: applicationId } = params
 
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -177,7 +178,8 @@ export async function PATCH(req: Request, { params }: RouteParams) {
 export async function DELETE(req: Request, { params }: RouteParams) {
   try {
     const session = await getServerSession(authOptions)
-    const { id: applicationId } = await params
+    const { id: applicationId } = params
+
 
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })

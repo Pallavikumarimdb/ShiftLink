@@ -177,7 +177,7 @@ export default function JobDetailPage() {
                   {job.rating && <StarRating rating={job.rating} size="sm" />}
                 </div>
               </div>
-              <Badge className="text-lg px-3 py-1 h-auto">{formatCurrency(job.hourlyRate)}/hr</Badge>
+              <Badge className="text-lg px-3 py-1 h-auto bg-lime-500 hover:bg-lime-400">{formatCurrency(job.hourlyRate)}/hr</Badge>
             </div>
           </CardHeader>
 

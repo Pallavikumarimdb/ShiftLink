@@ -15,6 +15,7 @@ import { PostJobForm } from "@/components/post-job-form"
 import { ReviewForm } from "@/components/review-form"
 import { VerificationBadge } from "@/components/verification-badge"
 import { MapPin, Clock, Calendar, MoreVertical, Plus, Briefcase, Users, CheckCircle, XCircle, Star } from "lucide-react"
+import { useSession } from "next-auth/react"
 
 interface Job {
   id: string
@@ -53,32 +54,40 @@ interface User {
   id: string
   name: string
   email: string
+  role: string
   isVerified: boolean
+  employerId?: string
+  studentId?: string
+  adminId?: string
+  country?: string
+  language?: string
+  image?: string | null
 }
 
 export default function EmployerDashboard() {
-  const { user } = useAuth()
+  const { data: session } = useSession()
+  const user = session?.user as User
   const [jobs, setJobs] = useState<Job[]>([])
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null)
   const [applications, setApplications] = useState<Application[]>([])
   const [recentApplications, setRecentApplications] = useState<RecentApplication[]>([])
-  const [isPostJobDialogOpen, setIsPostJobDialogOpen] = useState<boolean>(false)
-  const [isViewApplicantsDialogOpen, setIsViewApplicantsDialogOpen] = useState<boolean>(false)
-  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState<boolean>(false)
-  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null)
   const [completedApplications, setCompletedApplications] = useState<CompletedApplication[]>([])
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null)
+  const [selectedApplication, setSelectedApplication] = useState<Application | RecentApplication | CompletedApplication | null>(null)
+  const [isPostJobDialogOpen, setIsPostJobDialogOpen] = useState(false)
+  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false)
+  const [isViewApplicantsDialogOpen, setIsViewApplicantsDialogOpen] = useState<boolean>(false)
 
   useEffect(() => {
-    if (user?.id) {
+    if (session?.user?.employerId) {
       fetchJobs()
       fetchCompletedApplications()
+      fetchRecentApplications()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user])
+  }, [session])
 
   const fetchJobs = async () => {
-    if (!user?.id) return
-    const res = await fetch(`/api/jobs?employerId=${user.id}`)
+    if (!session?.user?.employerId) return
+    const res = await fetch(`/api/jobs?employerId=${session.user.employerId}`)
     if (res.ok) {
       const data: Job[] = await res.json()
       setJobs(data)
@@ -86,14 +95,30 @@ export default function EmployerDashboard() {
   }
 
   const fetchCompletedApplications = async () => {
-    if (!user?.id) return
-    const res = await fetch(`/api/applications?isCompleted=true`)
+    if (!session?.user?.employerId) return
+    console.log("Fetching completed applications for employer:", session.user.employerId)
+    const res = await fetch(`/api/applications?isCompleted=true&employerId=${session.user.employerId}`)
     if (res.ok) {
       const data: CompletedApplication[] = await res.json()
+      console.log("Completed applications data:", data)
       setCompletedApplications(data)
+    } else {
+      console.error("Failed to fetch completed applications:", await res.text())
     }
   }
 
+  const fetchRecentApplications = async () => {
+    if (!session?.user?.employerId) return
+    console.log("Fetching recent applications for employer:", session.user.employerId)
+    const res = await fetch(`/api/applications?employerId=${session.user.employerId}`)
+    if (res.ok) {
+      const data: RecentApplication[] = await res.json()
+      console.log("Recent applications data:", data)
+      setRecentApplications(data)
+    } else {
+      console.error("Failed to fetch recent applications:", await res.text())
+    }
+  }
 
   const fetchApplications = async (jobId: string) => {
     const res = await fetch(`/api/applications?jobId=${jobId}`)
@@ -122,6 +147,7 @@ export default function EmployerDashboard() {
         throw new Error("Failed to update application status")
       }
 
+      // Update both applications and recentApplications state
       setApplications((prev) =>
         prev.map((app) =>
           app.id === applicationId
@@ -170,7 +196,7 @@ export default function EmployerDashboard() {
       )
       
       // Refresh completed applications
-      if (user?.id) {
+      if (session?.user?.id) {
         fetchCompletedApplications()
       }
     } catch (error) {
@@ -186,7 +212,7 @@ export default function EmployerDashboard() {
 
   const handleReviewSubmitted = () => {
     setIsReviewDialogOpen(false)
-    if (user?.id) {
+    if (session?.user?.id) {
       fetchCompletedApplications()
     }
   }
@@ -258,7 +284,7 @@ export default function EmployerDashboard() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem asChild>
-                            <Link href={`/employer/jobs/${job.id}`}>Edit Job</Link>
+                            <Link href={`/employer/jobs/${job.id}/edit`}>Edit Job</Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem className="text-destructive">Delete Job</DropdownMenuItem>
                         </DropdownMenuContent>
@@ -406,11 +432,11 @@ export default function EmployerDashboard() {
             <DialogTitle>Post a New Job</DialogTitle>
             <DialogDescription>Fill out the form below to create a new job listing.</DialogDescription>
           </DialogHeader>
-          {user?.id && user?.name && (
+          {session?.user?.id && session?.user?.name && (
             <PostJobForm
               onJobPosted={handleJobPosted}
-              employerId={user.id}
-              employerName={user.name}
+              employerId={session.user.id}
+              employerName={session.user.name}
             />
           )}
         </DialogContent>
@@ -497,13 +523,13 @@ export default function EmployerDashboard() {
       </Dialog>
 
       {/* Review Dialog */}
-      {/* <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
+      <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
         <DialogContent className="max-w-2xl">
-          {selectedApplication && user?.id && (
+          {selectedApplication && session?.user?.id && (
             <ReviewForm
               applicationId={selectedApplication.id}
               jobId={selectedApplication.jobId}
-              employerId={user.id}
+              employerId={session.user.id}
               studentId={selectedApplication.studentId}
               jobTitle={selectedJob?.title || ""}
               entityName={selectedApplication.studentName || "Student"}
@@ -512,7 +538,7 @@ export default function EmployerDashboard() {
             />
           )}
         </DialogContent>
-      </Dialog> */}
+      </Dialog>
     </div>
   )
 }

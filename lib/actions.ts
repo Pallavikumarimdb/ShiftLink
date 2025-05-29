@@ -6,6 +6,9 @@ import { redirect } from "next/navigation"
 import { hash } from "bcryptjs"
 import { db } from "@/lib/db"
 
+// Define UserRole type or import it from your models/types
+type UserRole = "STUDENT" | "EMPLOYER"
+
 // Register a new user
 export async function registerUser(formData: FormData) {
   try {
@@ -45,7 +48,7 @@ export async function registerUser(formData: FormData) {
           name,
           email,
           password: hashedPassword,
-          role: role.toUpperCase(),
+          role: role.toUpperCase() as UserRole,
         },
       })
 
@@ -200,42 +203,50 @@ export async function applyForJob(formData: FormData) {
   }
 }
 
-// Update application status
+type AppStatus = "PENDING" | "APPROVED" | "REJECTED"; // or whatever strings you're using
+
 export async function updateApplicationStatus(formData: FormData) {
   try {
-    const applicationId = formData.get("applicationId") as string
-    const status = formData.get("status") as string
+    const applicationId = formData.get("applicationId") as string;
+    const status = formData.get("status") as string;
 
     if (!applicationId || !status) {
       return {
         error: "Missing required fields",
-      }
+      };
     }
 
-    // Update the application
+    // // Check if status is a valid AppStatus enum value
+    // if (!Object.values(AppStatus).includes(status.toUpperCase() as AppStatus)) {
+    //   return {
+    //     error: "Invalid application status",
+    //   };
+    // }
+
     const application = await db.application.update({
       where: {
         id: applicationId,
       },
       data: {
-        status: status.toUpperCase(),
+        status: status.toUpperCase() as AppStatus,
       },
-    })
+    });
 
-    revalidatePath("/employer/jobs")
-    revalidatePath("/student/applications")
+    revalidatePath("/employer/jobs");
+    revalidatePath("/student/applications");
 
     return {
       success: true,
       application,
-    }
+    };
   } catch (error) {
-    console.error("Error updating application:", error)
+    console.error("Error updating application:", error);
     return {
       error: "An error occurred while updating the application",
-    }
+    };
   }
 }
+
 
 // Mark application as completed
 export async function completeApplication(formData: FormData) {
@@ -434,6 +445,9 @@ export async function submitVerificationRequest(formData: FormData) {
   }
 }
 
+// Define VerificationStatus type or import it from your models/types
+type VerificationStatus = "PENDING" | "APPROVED" | "REJECTED"
+
 // Update verification request status (admin only)
 export async function updateVerificationStatus(formData: FormData) {
   try {
@@ -466,7 +480,7 @@ export async function updateVerificationStatus(formData: FormData) {
           id: requestId,
         },
         data: {
-          status: status.toUpperCase(),
+          status: status.toUpperCase() as VerificationStatus,
           reviewedAt: new Date(),
           reviewedBy: adminId,
         },
@@ -574,43 +588,7 @@ export async function unflagEmployer(formData: FormData) {
   }
 }
 
-// Update user language preference
-export async function updateUserLanguage(formData: FormData) {
-  try {
-    const userId = formData.get("userId") as string
-    const language = formData.get("language") as string
 
-    if (!userId || !language) {
-      return {
-        error: "Missing required fields",
-      }
-    }
-
-    // Update user language
-    await db.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        language,
-      },
-    })
-
-    // Set cookie
-    cookies().set("NEXT_LOCALE", language, {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 1 week
-    })
-
-    // Redirect to refresh the page with new language
-    redirect(new URL((formData.get("redirectUrl") as string) || "/").pathname)
-  } catch (error) {
-    console.error("Error updating user language:", error)
-    return {
-      error: "An error occurred while updating the user language",
-    }
-  }
-}
 
 // Update user country preference
 export async function updateUserCountry(formData: FormData) {
@@ -635,7 +613,8 @@ export async function updateUserCountry(formData: FormData) {
     })
 
     // Set cookie
-    cookies().set("NEXT_COUNTRY", country, {
+    const cookieStore = await cookies();
+    cookieStore.set("NEXT_COUNTRY", country, {
       path: "/",
       maxAge: 60 * 60 * 24 * 7, // 1 week
     })

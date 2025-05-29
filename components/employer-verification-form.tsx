@@ -1,8 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useAuth } from "@/components/auth-provider"
-import { createVerificationRequest } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,12 +10,32 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { AlertCircle, Upload, CheckCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
+interface FormData {
+  businessLicense: string
+  taxId: string
+  businessAddress: string
+  contactPerson: string
+  contactPhone: string
+  additionalInfo: string
+  documents: File[]
+}
+
+interface User {
+  id: string
+  employerId: string
+  isVerified: boolean
+  verificationStatus: "not_submitted" | "pending" | "approved" | "rejected"
+  // Add other user properties as needed based on useAuth hook
+}
+
 export function EmployerVerificationForm() {
-  const { user, updateUser } = useAuth()
+  const { user, updateUser } = useAuth() as { user: User | null; updateUser: (userData: Partial<User>) => void }
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
-  const [formData, setFormData] = useState({
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const [formData, setFormData] = useState<FormData>({
     businessLicense: "",
     taxId: "",
     businessAddress: "",
@@ -26,12 +45,12 @@ export function EmployerVerificationForm() {
     documents: [] as File[],
   })
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
     setFormData((prev) => ({
       ...prev,
@@ -39,18 +58,25 @@ export function EmployerVerificationForm() {
     }))
   }
 
-  const removeFile = (index) => {
+  const removeFile = (index: number) => {
     setFormData((prev) => ({
       ...prev,
       documents: prev.documents.filter((_, i) => i !== index),
     }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setSuccess("")
     setIsLoading(true)
+
+    // Ensure user and employerId are available
+    if (!user || !user.employerId) {
+      setError("User information is not available. Cannot submit request.")
+      setIsLoading(false)
+      return
+    }
 
     try {
       // Validate form
@@ -60,19 +86,29 @@ export function EmployerVerificationForm() {
 
       // In a real app, we would upload the documents to a storage service
       // and then create the verification request with the document URLs
+      // For now, sending only filenames to match the current API structure
       const documentNames = formData.documents.map((file) => file.name)
 
-      // Create verification request
-      const verificationRequest = createVerificationRequest({
-        employerId: user?.id,
-        businessLicense: formData.businessLicense,
-        taxId: formData.taxId,
-        businessAddress: formData.businessAddress,
-        contactPerson: formData.contactPerson,
-        contactPhone: formData.contactPhone,
-        additionalInfo: formData.additionalInfo,
-        verificationDocuments: documentNames,
+      // Create verification request via API
+      const response = await fetch("/api/verification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employerId: user!.employerId,
+          businessLicense: formData.businessLicense,
+          taxId: formData.taxId,
+          // Optional fields not included in API yet: businessAddress, contactPerson, contactPhone, additionalInfo
+          verificationDocuments: documentNames,
+        }),
       })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to submit verification request")
+      }
 
       // Update user verification status
       updateUser({
@@ -82,7 +118,10 @@ export function EmployerVerificationForm() {
       setSuccess(
         "Verification request submitted successfully! We will review your information and get back to you soon.",
       )
-    } catch (err) {
+      // Optionally reset form fields here
+      // setFormData({ businessLicense: "", taxId: "", businessAddress: "", contactPerson: "", contactPhone: "", additionalInfo: "", documents: [] });
+
+    } catch (err: any) {
       setError(err.message || "Failed to submit verification request. Please try again.")
     } finally {
       setIsLoading(false)
@@ -223,8 +262,13 @@ export function EmployerVerificationForm() {
                 className="hidden"
                 onChange={handleFileChange}
                 accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                ref={fileInputRef}
               />
-              <Button type="button" variant="outline" onClick={() => document.getElementById("documents").click()}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+              >
                 Select Files
               </Button>
             </div>
@@ -263,7 +307,7 @@ export function EmployerVerificationForm() {
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full" disabled={isLoading || !user?.employerId}>
             {isLoading ? "Submitting..." : "Submit Verification Request"}
           </Button>
         </form>

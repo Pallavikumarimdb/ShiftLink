@@ -31,6 +31,13 @@ export default function EmployerRegisterPage() {
     agreeTerms: false,
   })
 
+  const [message, setMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    const msg = new URLSearchParams(window.location.search).get("message")
+    if (msg) setMessage(msg)
+  }, [])
+
   useEffect(() => {
     if (user && user.role === "student") {
       setError("You are already logged in as a student. Please log out first to register as an employer.")
@@ -60,7 +67,7 @@ export default function EmployerRegisterPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError("")
-    
+
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match")
       return
@@ -89,10 +96,10 @@ export default function EmployerRegisterPage() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Employer Registration</CardTitle>
           <CardDescription>Create an account to post jobs and find international student talent</CardDescription>
-          {new URLSearchParams(window.location.search).get("message") && (
+          {message && (
             <Alert className="mt-4 bg-amber-50 text-amber-800 dark:bg-amber-900 dark:text-amber-300">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{new URLSearchParams(window.location.search).get("message")}</AlertDescription>
+              <AlertDescription>{message}</AlertDescription>
             </Alert>
           )}
         </CardHeader>

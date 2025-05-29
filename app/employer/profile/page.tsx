@@ -3,7 +3,6 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react"
 import Link from "next/link"
 import { useAuth } from "@/components/auth-provider"
-import { getEmployerReviews, getEmployerAverageRating } from "@/lib/utils/data-utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -45,12 +44,16 @@ interface Review {
   reviewerName: string
 }
 
-interface User {
+interface ExtendedUser {
   id: string
-  name: string
   email: string
-  employerId: string
-  isVerified: boolean
+  name?: string
+  role: "student" | "employer" | "admin"
+  isPremium?: boolean
+  isVerified?: boolean
+  verificationStatus?: "none" | "pending" | "approved" | "rejected"
+  rating?: number
+  employerId?: string
 }
 
 export default function EmployerProfilePage() {
@@ -64,7 +67,6 @@ export default function EmployerProfilePage() {
   const [totalJobs, setTotalJobs] = useState(0)
   const [totalApplications, setTotalApplications] = useState(0)
 
-
   const [formData, setFormData] = useState({
     businessName: "",
     businessType: "",
@@ -77,55 +79,78 @@ export default function EmployerProfilePage() {
   })
 
   useEffect(() => {
-    if (user?.id) {
-      setIsLoading(true)
-      Promise.all([
-        fetch(`/api/employers/${user.id}`).then((res) => res.json()),
-        getEmployerReviews(user.id),
-        getEmployerAverageRating(user.id),
-      ])
-        .then(([profileStats, reviewsData, avgRating]) => {
-          if (profileStats.error) {
-            throw new Error(profileStats.error)
-          }
-          
-          setProfile(profileStats.profile)
-          setTotalJobs(profileStats.totalJobs)
-          setTotalApplications(profileStats.totalApplications)
-          
-          // Transform reviews data to match Review interface
-          const transformedReviews: Review[] = reviewsData.map((review: any) => ({
-            id: review.id,
-            applicationId: review.applicationId,
-            jobTitle: review.jobTitle,
-            studentId: review.studentId,
-            studentName: review.studentName || "Anonymous Student",
-            rating: review.rating || 0,
-            comment: review.comment || "",
-            reviewedAt: review.reviewedAt ? new Date(review.reviewedAt).toISOString() : new Date().toISOString(),
-            createdAt: review.createdAt ? new Date(review.createdAt).toISOString() : new Date().toISOString(),
-            reviewerName: review.studentName || "Anonymous Student"
-          }))
-          
-          setReviews(transformedReviews)
-          setAverageRating(avgRating || 0)
-          setFormData((prev) => ({
-            ...prev,
-            businessName: profileStats.profile.companyName || "",
-            businessType: profileStats.profile.industry || "",
-            location: "",
-            email: profileStats.profile.email || "",
-            website: profileStats.profile.website || "",
-            description: profileStats.profile.description || "",
-          }))
-        })
-        .catch((err) => {
-          console.error("Error loading profile data:", err)
-          setError("Failed to load profile data. Please try again later.")
-        })
-        .finally(() => setIsLoading(false))
+    const extendedUser = user as ExtendedUser
+    if (extendedUser?.employerId) {
+      fetchProfileData()
     }
   }, [user])
+
+  const fetchProfileData = async () => {
+    const extendedUser = user as ExtendedUser
+    if (!extendedUser?.employerId) {
+      setError("No employer ID found")
+      return
+    }
+
+    setIsLoading(true)
+    setError("")
+    try {
+      const [profileRes, reviewsRes] = await Promise.all([
+        fetch(`/api/employers/${extendedUser.employerId}`),
+        fetch(`/api/employers/${extendedUser.employerId}/reviews`),
+      ])
+
+      if (!profileRes.ok) {
+        const errorData = await profileRes.json()
+        throw new Error(errorData.error || "Failed to fetch profile data")
+      }
+
+      if (!reviewsRes.ok) {
+        const errorData = await reviewsRes.json()
+        throw new Error(errorData.error || "Failed to fetch reviews")
+      }
+
+      const [profileStats, reviewsData] = await Promise.all([
+        profileRes.json(),
+        reviewsRes.json(),
+      ])
+      
+      setProfile(profileStats.profile)
+      setTotalJobs(profileStats.totalJobs)
+      setTotalApplications(profileStats.totalApplications)
+      
+      // Transform reviews data to match Review interface
+      const transformedReviews: Review[] = reviewsData.reviews.map((review: any) => ({
+        id: review.id,
+        applicationId: review.applicationId,
+        jobTitle: review.jobTitle,
+        studentId: review.studentId,
+        studentName: review.studentName || "Anonymous Student",
+        rating: review.rating || 0,
+        comment: review.comment || "",
+        reviewedAt: review.reviewedAt ? new Date(review.reviewedAt).toISOString() : new Date().toISOString(),
+        createdAt: review.createdAt ? new Date(review.createdAt).toISOString() : new Date().toISOString(),
+        reviewerName: review.studentName || "Anonymous Student"
+      }))
+      
+      setReviews(transformedReviews)
+      setAverageRating(reviewsData.averageRating || 0)
+      setFormData((prev) => ({
+        ...prev,
+        businessName: profileStats.profile.companyName || "",
+        businessType: profileStats.profile.industry || "",
+        location: "",
+        email: profileStats.profile.email || "",
+        website: profileStats.profile.website || "",
+        description: profileStats.profile.description || "",
+      }))
+    } catch (err) {
+      console.error("Error loading profile data:", err)
+      setError(err instanceof Error ? err.message : "Failed to load profile data. Please try again later.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -138,6 +163,12 @@ export default function EmployerProfilePage() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    const extendedUser = user as ExtendedUser
+    if (!extendedUser?.employerId) {
+      setError("No employer ID found")
+      return
+    }
+
     setError("")
     setSuccess("")
     setIsLoading(true)
@@ -150,7 +181,7 @@ export default function EmployerProfilePage() {
         }
       })
 
-      const response = await fetch(`/api/employers/${user?.id}`, {
+      const response = await fetch(`/api/employers/${extendedUser.employerId}`, {
         method: "PATCH",
         body: formDataToSend,
       })
@@ -169,6 +200,17 @@ export default function EmployerProfilePage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (isLoading && !profile) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 w-48 bg-muted rounded"></div>
+          <div className="h-[600px] bg-muted rounded"></div>
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -3,10 +3,14 @@ import prisma from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 
-// GET employer profile, total jobs, and total applications
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+interface RouteParams {
+  params: Promise<{ id: string }>
+}
+
+export async function GET(req: Request, { params }: RouteParams) {
   try {
-    const employerId = params.id
+    const { id: employerId } = await params
+
     if (!employerId) {
       return NextResponse.json({ error: "Employer ID is required" }, { status: 400 })
     }
@@ -23,16 +27,15 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         },
       },
     })
+
     if (!employer) {
       return NextResponse.json({ error: "Employer not found" }, { status: 404 })
     }
 
-    // Fetch total jobs posted by employer
     const totalJobs = await prisma.job.count({ where: { employerId } })
-
-    // Fetch total applications for employer's jobs
     const jobs = await prisma.job.findMany({ where: { employerId }, select: { id: true } })
     const jobIds = jobs.map((job) => job.id)
+
     let totalApplications = 0
     if (jobIds.length > 0) {
       totalApplications = await prisma.application.count({ where: { jobId: { in: jobIds } } })
@@ -63,14 +66,15 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: RouteParams) {
   try {
+    const { id: employerId } = await params
     const session = await getServerSession(authOptions)
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const employerId = params.id
     if (!employerId) {
       return NextResponse.json({ error: "Employer ID is required" }, { status: 400 })
     }
@@ -103,7 +107,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     // Handle logo upload if present
     const logo = formData.get("logo") as File | null
     if (logo) {
-      // In a real app, upload this to a storage service later implemnt this sothing like s3 or firebase storage
+      // In a real app, upload this to a storage service later implement this something like s3 or firebase storage
       // For now, we'll just store the filename
       updates.logo = logo.name
     }

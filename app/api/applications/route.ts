@@ -6,6 +6,7 @@ import prisma from "@/lib/prisma"
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions)
+    console.log("Session user:", session?.user)
 
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -18,6 +19,8 @@ export async function GET(req: Request) {
     const status = url.searchParams.get("status")
     const isCompleted = url.searchParams.get("isCompleted")
 
+    console.log("Query params:", { studentIdParam, jobId, employerId, status, isCompleted })
+
     const filter: any = {}
 
     // STUDENT: see only own applications
@@ -27,17 +30,19 @@ export async function GET(req: Request) {
 
     // EMPLOYER: handle different filtering scenarios
     if (session.user.role === "EMPLOYER") {
+      console.log("Processing employer request")
       // If employerId is specified and matches current user, or no employerId specified
       if (!employerId || employerId === session.user.employerId) {
         const employerJobs = await prisma.job.findMany({
           where: { employerId: session.user.employerId },
           select: { id: true },
         })
+        console.log("Found employer jobs:", employerJobs)
 
         const jobIds = employerJobs.map((job) => job.id)
         filter.jobId = { in: jobIds }
       } else {
-        // If employerId specified but doesn't match current user, return empty
+        console.log("Employer ID mismatch")
         return NextResponse.json([])
       }
     }
@@ -59,14 +64,23 @@ export async function GET(req: Request) {
       filter.isCompleted = isCompleted === "true"
     }
 
+    console.log("Final filter:", filter)
+
     const applications = await prisma.application.findMany({
       where: filter,
       include: {
         job: {
-          include: {
+          select: {
+            id: true,
+            title: true,
+            employerId: true,
             employer: {
-              include: {
-                user: { select: { name: true } },
+              select: {
+                user: {
+                  select: {
+                    name: true,
+                  },
+                },
               },
             },
           },
@@ -88,6 +102,7 @@ export async function GET(req: Request) {
       },
     })
 
+    console.log("Found applications:", applications.length)
 
     const formattedApplications = applications.map((app) => {
       const baseApplication = {
@@ -101,21 +116,13 @@ export async function GET(req: Request) {
         notes: app.notes,
         isCompleted: app.isCompleted,
         completedAt: app.completedAt,
+        jobTitle: app.job.title, // Always include job title
       }
 
-      // For recent applications (employerId specified), include job title
-      if (employerId) {
-        return {
-          ...baseApplication,
-          jobTitle: app.job.title,
-        }
-      }
-
-      // For completed applications, include job title and review status
+      // For completed applications, include review status
       if (isCompleted === "true") {
         return {
           ...baseApplication,
-          jobTitle: app.job.title,
           hasEmployerReview: !!app.review,
         }
       }
@@ -126,13 +133,8 @@ export async function GET(req: Request) {
         job: {
           id: app.job.id,
           title: app.job.title,
-          location: app.job.location,
-          hourlyRate: app.job.hourlyRate,
-          hoursPerWeek: app.job.hoursPerWeek,
-          shiftTimes: app.job.shiftTimes,
           employerId: app.job.employerId,
           employerName: app.job.employer.user.name,
-          isVerified: app.job.employer.isVerified,
         },
         student: {
           id: app.student.id,

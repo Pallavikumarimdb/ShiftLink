@@ -38,8 +38,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     // Check permissions
     if (
       session.user.role === "EMPLOYER" &&
-      request.employerId !== session.user.employerId &&
-      session.user.role !== "ADMIN"
+      request.employerId !== session.user.employerId
+      // session.user.role !== "ADMIN"
     ) {
       return NextResponse.json(
         { error: "You don't have permission to view this verification request" },

@@ -99,6 +99,7 @@ export async function POST(req: Request) {
 
     // Create the verification request
     const request = await prisma.verificationRequest.create({
+      //@ts-ignore
       data: {
         employerId: session.user.employerId,
         businessLicense,

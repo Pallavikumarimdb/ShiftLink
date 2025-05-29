@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,6 +12,8 @@ interface PostJobFormProps {
   onJobPosted: (job: Job) => void
   employerId: string
   employerName: string
+  initialData?: Job
+  isEditing?: boolean
 }
 
 interface Job {
@@ -26,6 +28,8 @@ interface Job {
   employerId: string
   employerName: string
   createdAt: string
+  isPremium?: boolean
+  country?: string
 }
 
 interface FormData {
@@ -38,7 +42,7 @@ interface FormData {
   requirements: string
 }
 
-export function PostJobForm({ onJobPosted, employerId, employerName }: PostJobFormProps) {
+export function PostJobForm({ onJobPosted, employerId, employerName, initialData, isEditing = false }: PostJobFormProps) {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [error, setError] = useState<string>("")
   const [formData, setFormData] = useState<FormData>({
@@ -50,6 +54,20 @@ export function PostJobForm({ onJobPosted, employerId, employerName }: PostJobFo
     shiftTimes: "",
     requirements: "",
   })
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        title: initialData.title,
+        location: initialData.location,
+        description: initialData.description,
+        hourlyRate: initialData.hourlyRate.toString(),
+        hoursPerWeek: initialData.hoursPerWeek.toString(),
+        shiftTimes: initialData.shiftTimes,
+        requirements: initialData.requirements || "",
+      })
+    }
+  }, [initialData])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -74,21 +92,24 @@ export function PostJobForm({ onJobPosted, employerId, employerName }: PostJobFo
         employerName,
       }
 
-      const res = await fetch("/api/jobs", {
-        method: "POST",
+      const url = isEditing ? `/api/jobs/${initialData?.id}` : "/api/jobs"
+      const method = isEditing ? "PUT" : "POST"
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(jobData),
       })
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        throw new Error(data.message || "Failed to create job. Please try again.")
+        throw new Error(data.message || `Failed to ${isEditing ? "update" : "create"} job. Please try again.`)
       }
 
-      const newJob: Job = await res.json()
-      onJobPosted(newJob)
+      const job: Job = await res.json()
+      onJobPosted(job)
     } catch (err: any) {
-      setError(err.message || "Failed to create job. Please try again.")
+      setError(err.message || `Failed to ${isEditing ? "update" : "create"} job. Please try again.`)
     } finally {
       setIsSubmitting(false)
     }
@@ -201,7 +222,7 @@ export function PostJobForm({ onJobPosted, employerId, employerName }: PostJobFo
 
       <div className="flex justify-end gap-2">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Creating..." : "Create Job Listing"}
+          {isSubmitting ? (isEditing ? "Updating..." : "Creating...") : (isEditing ? "Update Job" : "Create Job Listing")}
         </Button>
       </div>
     </form>

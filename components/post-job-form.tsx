@@ -20,6 +20,7 @@ interface Job {
   id: string
   title: string
   location: string
+  externallink?: string
   description: string
   hourlyRate: number
   hoursPerWeek: number
@@ -40,6 +41,7 @@ interface FormData {
   hoursPerWeek: string
   shiftTimes: string
   requirements: string
+  externallink?: string
 }
 
 export function PostJobForm({ onJobPosted, employerId, employerName, initialData, isEditing = false }: PostJobFormProps) {
@@ -48,6 +50,7 @@ export function PostJobForm({ onJobPosted, employerId, employerName, initialData
   const [formData, setFormData] = useState<FormData>({
     title: "",
     location: "",
+    externallink: "",
     description: "",
     hourlyRate: "",
     hoursPerWeek: "",
@@ -60,6 +63,7 @@ export function PostJobForm({ onJobPosted, employerId, employerName, initialData
       setFormData({
         title: initialData.title,
         location: initialData.location,
+        externallink: initialData.externallink,
         description: initialData.description,
         hourlyRate: initialData.hourlyRate.toString(),
         hoursPerWeek: initialData.hoursPerWeek.toString(),
@@ -147,6 +151,18 @@ export function PostJobForm({ onJobPosted, employerId, employerName, initialData
           onChange={handleChange}
           placeholder="e.g., Downtown, University Area"
           required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="externallink">External Post Link (Optional)</Label>
+        <Input
+          id="externallink"
+          name="externallink"
+          className="bg-slate-900"
+          value={formData.externallink}
+          onChange={handleChange}
+          placeholder="e.g., https://www.example.com/job-posting/google/123456"
         />
       </div>
 

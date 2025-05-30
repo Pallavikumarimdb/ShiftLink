@@ -72,6 +72,7 @@ export async function GET(req: Request) {
       id: job.id,
       title: job.title,
       location: job.location,
+      externallink: job.externallink,
       description: job.description,
       requirements: job.requirements,
       hourlyRate: job.hourlyRate,
@@ -103,7 +104,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json()
-    const { title, location, description, requirements, hourlyRate, hoursPerWeek, shiftTimes, isPremium, country } =
+    const { title, location, externallink, description, requirements, hourlyRate, hoursPerWeek, shiftTimes, isPremium, country } =
       body
 
 
@@ -113,6 +114,7 @@ export async function POST(req: Request) {
         location,
         description,
         requirements,
+        externallink,
         hourlyRate: Number(hourlyRate), 
         hoursPerWeek: Number(hoursPerWeek), 
         shiftTimes,

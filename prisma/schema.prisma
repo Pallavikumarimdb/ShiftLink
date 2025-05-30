@@ -112,6 +112,7 @@ model Job {
   location     String
   description  String
   requirements String?
+  externallink String?
   hourlyRate   Float
   hoursPerWeek Int
   shiftTimes   String

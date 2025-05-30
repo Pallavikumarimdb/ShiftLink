@@ -52,6 +52,7 @@ export async function GET(req: Request, { params }: RouteParams) {
       id: job.id,
       title: job.title,
       location: job.location,
+      externallink: job.externallink,
       description: job.description,
       requirements: job.requirements,
       hourlyRate: job.hourlyRate,
@@ -76,7 +77,7 @@ export async function GET(req: Request, { params }: RouteParams) {
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions)
-    const jobId = params.id
+    const { id: jobId } = await params
 
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -108,6 +109,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       description,
       requirements,
       hourlyRate,
+      externallink,
       hoursPerWeek,
       shiftTimes,
       isPremium,
@@ -125,6 +127,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         location,
         description,
         requirements,
+        externallink,
         hourlyRate: Number.parseFloat(hourlyRate),
         hoursPerWeek: Number.parseInt(hoursPerWeek),
         shiftTimes,
@@ -149,7 +152,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const jobId = params.id
+    const { id: jobId } = await params
     if (!jobId) {
       return NextResponse.json({ error: "Job ID is required" }, { status: 400 })
     }

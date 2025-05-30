@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { ExternalLinkIcon } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useAuth } from "@/components/auth-provider"
@@ -28,6 +29,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 interface Job {
   id: string
   title: string
+  externallink?: string
   employerName: string
   employerEmail?: string
   employerPhone?: string
@@ -66,6 +68,7 @@ export default function JobDetailPage() {
       if (!res.ok) throw new Error("Job not found")
       const data: Job = await res.json()
       setJob(data)
+      console.log("external", data.externallink)
     } catch (err) {
       setError("Job not found")
       console.error("Error fetching job:", err)
@@ -73,7 +76,7 @@ export default function JobDetailPage() {
       setLoading(false)
     }
   }
-  
+
   useEffect(() => {
     if (params.id) {
       const id = Array.isArray(params.id) ? params.id[0] : params.id
@@ -262,9 +265,9 @@ export default function JobDetailPage() {
                         <span>
                           {job.employerPhone ||
                             "555-" +
-                              Math.floor(100 + Math.random() * 900) +
-                              "-" +
-                              Math.floor(1000 + Math.random() * 9000)}
+                            Math.floor(100 + Math.random() * 900) +
+                            "-" +
+                            Math.floor(1000 + Math.random() * 9000)}
                         </span>
                       </p>
                     </div>
@@ -357,10 +360,24 @@ export default function JobDetailPage() {
           </Tabs>
 
           <CardFooter>
-            <Button className="w-full" onClick={() => setIsApplyDialogOpen(true)}>
-              Apply For Job
-            </Button>
+            {job?.externallink ? (
+              <a
+                href={job.externallink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full"
+              >
+                <Button variant="outline" className="w-full">
+                  Apply For Job <ExternalLinkIcon className="ml-2 h-4 w-4" />
+                </Button>
+              </a>
+            ) : (
+              <Button className="w-full" onClick={() => setIsApplyDialogOpen(true)}>
+                Apply For Job
+              </Button>
+            )}
           </CardFooter>
+
         </Card>
 
         {/* Apply Dialog */}

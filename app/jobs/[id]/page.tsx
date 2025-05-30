@@ -25,6 +25,7 @@ import { VerificationBadge } from "@/components/verification-badge"
 import { StarRating } from "@/components/star-rating"
 import { JobSummarizer } from "@/components/ai/job-summarizer"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { toast } from "sonner"
 
 interface Job {
   id: string
@@ -61,6 +62,27 @@ export default function JobDetailPage() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState<boolean>(false)
   const [activeTab, setActiveTab] = useState<string>("details")
+  const [hasApplied, setHasApplied] = useState(false);
+
+  useEffect(() => {
+  const checkIfApplied = async () => {
+    if (!user || !job?.id) return;
+
+    try {
+      const res = await fetch(`/api/applications/check?jobId=${job.id}&studentId=${user.id}`);
+      const data = await res.json();
+      if (res.ok && data.hasApplied) {
+        setHasApplied(true);
+      }
+    } catch (err) {
+      console.error("Error checking application status:", err);
+    }
+  };
+
+  checkIfApplied();
+}, [user, job?.id]);
+
+
 
   const fetchJob = async (id: string) => {
     try {
@@ -84,13 +106,41 @@ export default function JobDetailPage() {
     }
   }, [params.id])
 
-  const handleApply = async () => {
-    if (!user) {
-      router.push("/login")
-      return
-    }
+ const handleApply = async () => {
+  if (!user) {
+    router.push("/login");
+    return;
+  }
 
-    setIsSubmitting(true)
+  if (job?.externallink) {
+    try {
+      const res = await fetch('/api/applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: job?.id || "",
+          studentId: user.id,
+          notes: "applied via external link",
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok && data.error !== "Already applied") {
+        throw new Error(data.error || "Failed to submit application");
+      } 
+
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to submit application. Please try again.";
+      setError(errorMessage);
+    } finally {
+      toast.success("Application submitted successfully!");
+    }
+  } else {
+    // Internal job logic
+    setIsSubmitting(true);
     try {
       const res = await fetch('/api/applications', {
         method: 'POST',
@@ -100,21 +150,27 @@ export default function JobDetailPage() {
           studentId: user.id,
           notes: applicationNotes,
         }),
-      })
+      });
+
       if (!res.ok) {
-        const errorData = await res.json()
-        throw new Error(errorData.error || "Failed to submit application")
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to submit application");
       }
-      setIsApplyDialogOpen(false)
-      setIsSuccessDialogOpen(true)
-      setApplicationNotes("") // Reset form
+
+      setIsApplyDialogOpen(false);
+      setIsSuccessDialogOpen(true);
+      setApplicationNotes(""); // Reset form
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to submit application. Please try again."
-      setError(errorMessage)
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to submit application. Please try again.";
+      setError(errorMessage);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
+};
 
   if (loading) {
     return (
@@ -367,13 +423,13 @@ export default function JobDetailPage() {
                 rel="noopener noreferrer"
                 className="w-full"
               >
-                <Button variant="outline" className="w-full">
-                  Apply For Job <ExternalLinkIcon className="ml-2 h-4 w-4" />
+                <Button variant={hasApplied ? "outline" : "default"}  className="w-full" onClick={handleApply}>
+                  {hasApplied ? "Has clicked apply" : "Apply For Job"} <ExternalLinkIcon className="ml-2 h-4 w-4" />
                 </Button>
               </a>
             ) : (
-              <Button className="w-full" onClick={() => setIsApplyDialogOpen(true)}>
-                Apply For Job
+              <Button variant={hasApplied ? "outline" : "default"}  className="w-full" onClick={() => setIsApplyDialogOpen(true)}>
+                {hasApplied ? "Already Applied" : "Apply For Job"}
               </Button>
             )}
           </CardFooter>

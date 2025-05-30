@@ -174,7 +174,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Student ID not found in session." }, { status: 400 })
     }
 
-
     const job = await prisma.job.findUnique({
       where: {
         id: jobId,
@@ -193,9 +192,11 @@ export async function POST(req: Request) {
     })
 
     if (existingApplication) {
+      if (notes === "applied via external link") {
+        return NextResponse.json(existingApplication, { status: 200 })
+      }
       return NextResponse.json({ error: "You have already applied for this job" }, { status: 400 })
     }
-
 
     const application = await prisma.application.create({
       data: {

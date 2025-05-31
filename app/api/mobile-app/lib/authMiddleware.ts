@@ -2,6 +2,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import jwt from 'jsonwebtoken';
 
+
 export interface AuthRequest extends NextApiRequest {
   userId?: string;
 }

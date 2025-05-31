@@ -2,9 +2,15 @@
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { corsMiddleware } from '@/lib/cors';
 
 //@ts-ignore
 export default async function handler(req, res) {
+     corsMiddleware(res);
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end(); // Handle preflight request
+  }
   if (req.method !== 'POST') return res.status(405).end();
 
   const { email, password } = req.body;

@@ -46,7 +46,7 @@ export function JobSummarizer({ initialDescription = "" }) {
   }
 
   return (
-    <Card>
+    <Card className="bg-transparent text-black">
       <CardHeader>
         <CardTitle>Job Description Summarizer</CardTitle>
         <CardDescription>
@@ -68,7 +68,7 @@ export function JobSummarizer({ initialDescription = "" }) {
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
             placeholder="Paste the job description here..."
-            className="min-h-[150px]"
+            className="min-h-[150px] bg-slate-300"
           />
         </div>
 
@@ -88,7 +88,7 @@ export function JobSummarizer({ initialDescription = "" }) {
       </CardContent>
 
       <CardFooter>
-        <Button onClick={handleSummarize} disabled={isLoading || !jobDescription.trim()} className="w-full">
+        <Button onClick={handleSummarize} disabled={isLoading || !jobDescription.trim()} className="p-4">
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

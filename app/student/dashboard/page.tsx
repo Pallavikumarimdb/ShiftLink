@@ -217,55 +217,60 @@ export default function StudentDashboardPage() {
               </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {jobs.length > 0 ? (
-                jobs.map((job) => (
-                  <Card key={job.id} className="overflow-hidden">
-                    <CardHeader className="pb-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <CardTitle className="text-xl">{job.title}</CardTitle>
-                            {job.isVerified && <VerificationBadge size="sm" />}
+            <div>
+              <p className=" text-sm text-gray-500"> {jobs.length} Jobs found</p>
+              <div className="mt-6">
+                {jobs.length > 0 ? (
+                  jobs.map((job) => (
+                    <Card key={job.id} className="overflow-hidden mt-4 !border-b-1 !border-gray-200">
+                      <CardHeader className="pb-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <CardTitle className="text-xl">{job.title}</CardTitle>
+                              {job.isVerified && <VerificationBadge size="sm" />}
+                            </div>
+                            <p className="text-muted-foreground">{job.employerName}</p>
                           </div>
-                          <p className="text-muted-foreground">{job.employerName}</p>
+                          <Badge variant="outline" className="ml-2">
+                            {formatCurrency(job.hourlyRate)}/hr
+                          </Badge>
                         </div>
-                        <Badge variant="outline" className="ml-2">
-                          {formatCurrency(job.hourlyRate)}/hr
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pb-4">
-                      <div className="space-y-3">
-                        <div className="flex items-center text-sm">
-                          <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
-                          <span>{job.location}</span>
+                      </CardHeader>
+                      <CardContent className="pb-4">
+                        <div className="space-y-3">
+                          <div className="flex flex-col md:flex-row justify-between gap-4 mb-4 text-muted-foreground">
+                            <div className="flex items-center text-sm">
+                              <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
+                              <span>{job.location}</span>
+                            </div>
+                            <div className="flex items-center text-sm">
+                              <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+                              <span>{job.hoursPerWeek} hours/week</span>
+                            </div>
+                            <div className="flex items-center text-sm">
+                              <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                              <span>{job.shiftTimes}</span>
+                            </div>
+                          </div>
+                          <p className="text-sm line-clamp-2 mt-2">{job.description}</p>
                         </div>
-                        <div className="flex items-center text-sm">
-                          <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
-                          <span>{job.hoursPerWeek} hours/week</span>
-                        </div>
-                        <div className="flex items-center text-sm">
-                          <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                          <span>{job.shiftTimes}</span>
-                        </div>
-                        <p className="text-sm line-clamp-2 mt-2">{job.description}</p>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="pt-0">
-                      <Button asChild className="w-full">
-                        <Link href={`/jobs/${job.id}`}>View Details</Link>
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))
-              ) : (
-                <div className="col-span-full text-center py-12">
-                  <Briefcase className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-                  <h3 className="mt-4 text-lg font-medium">No jobs found</h3>
-                  <p className="mt-2 text-muted-foreground">Try adjusting your filters to find more opportunities.</p>
-                </div>
-              )}
+                      </CardContent>
+                      <CardFooter className="pt-0">
+                        <Button asChild className="p-4">
+                          <Link href={`/jobs/${job.id}`}>View Details</Link>
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-12">
+                    <Briefcase className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
+                    <h3 className="mt-4 text-lg font-medium">No jobs found</h3>
+                    <p className="mt-2 text-muted-foreground">Try adjusting your filters to find more opportunities.</p>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
 

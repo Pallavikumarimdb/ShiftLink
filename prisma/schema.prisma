@@ -297,3 +297,26 @@ model TermsAcceptance {
   
   @@unique([userId, termsVersion])
 }
+
+
+
+
+
+model WaitlistEntry {
+  id           String   @id @default(cuid())
+  userType     UserType
+  location     String
+  country      String
+  email        String   @unique
+  mobile       String?
+  interests    String[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("waitlist_entries")
+}
+
+enum UserType {
+  JOB_SEEKER    // Users looking for part-time/odd jobs
+  EMPLOYER      // Business owners who want to hire workers
+}

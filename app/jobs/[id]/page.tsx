@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ExternalLinkIcon } from "lucide-react"
+import { ArrowLeft, ExternalLinkIcon } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useAuth } from "@/components/auth-provider"
@@ -65,29 +65,32 @@ export default function JobDetailPage() {
   const [hasApplied, setHasApplied] = useState(false);
 
   useEffect(() => {
-  const checkIfApplied = async () => {
-    if (!user || !job?.id) return;
+    const checkIfApplied = async () => {
+      if (!user || !job?.id) return;
 
-    try {
-      const res = await fetch(`/api/applications/check?jobId=${job.id}&studentId=${user.id}`);
-      const data = await res.json();
-      if (res.ok && data.hasApplied) {
-        setHasApplied(true);
+      try {
+        const res = await fetch(`/api/applications/check?jobId=${job.id}&studentId=${user.id}`);
+        const data = await res.json();
+        if (res.ok && data.hasApplied) {
+          setHasApplied(true);
+        }
+      } catch (err) {
+        console.error("Error checking application status:", err);
       }
-    } catch (err) {
-      console.error("Error checking application status:", err);
-    }
-  };
+    };
 
-  checkIfApplied();
-}, [user, job?.id]);
+    checkIfApplied();
+  }, [user, job?.id]);
 
 
 
   const fetchJob = async (id: string) => {
     try {
       const res = await fetch(`/api/jobs/${id}`)
-      if (!res.ok) throw new Error("Job not found")
+      if (res.status === 401) {
+        setError("You must be logged in to view this job.")
+      }
+      else if (!res.ok) throw new Error("Job not found")
       const data: Job = await res.json()
       setJob(data)
       console.log("external", data.externallink)
@@ -106,71 +109,71 @@ export default function JobDetailPage() {
     }
   }, [params.id])
 
- const handleApply = async () => {
-  if (!user) {
-    router.push("/login");
-    return;
-  }
-
-  if (job?.externallink) {
-    try {
-      const res = await fetch('/api/applications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jobId: job?.id || "",
-          studentId: user.id,
-          notes: "applied via external link",
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok && data.error !== "Already applied") {
-        throw new Error(data.error || "Failed to submit application");
-      } 
-
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Failed to submit application. Please try again.";
-      setError(errorMessage);
-    } finally {
-      toast.success("Application submitted successfully!");
+  const handleApply = async () => {
+    if (!user) {
+      router.push("/login");
+      return;
     }
-  } else {
-    // Internal job logic
-    setIsSubmitting(true);
-    try {
-      const res = await fetch('/api/applications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jobId: job?.id || "",
-          studentId: user.id,
-          notes: applicationNotes,
-        }),
-      });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to submit application");
+    if (job?.externallink) {
+      try {
+        const res = await fetch('/api/applications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jobId: job?.id || "",
+            studentId: user.id,
+            notes: "applied via external link",
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok && data.error !== "Already applied") {
+          throw new Error(data.error || "Failed to submit application");
+        }
+
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Failed to submit application. Please try again.";
+        setError(errorMessage);
+      } finally {
+        toast.success("Application submitted successfully!");
       }
+    } else {
+      // Internal job logic
+      setIsSubmitting(true);
+      try {
+        const res = await fetch('/api/applications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jobId: job?.id || "",
+            studentId: user.id,
+            notes: applicationNotes,
+          }),
+        });
 
-      setIsApplyDialogOpen(false);
-      setIsSuccessDialogOpen(true);
-      setApplicationNotes(""); // Reset form
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Failed to submit application. Please try again.";
-      setError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Failed to submit application");
+        }
+
+        setIsApplyDialogOpen(false);
+        setIsSuccessDialogOpen(true);
+        setApplicationNotes(""); // Reset form
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Failed to submit application. Please try again.";
+        setError(errorMessage);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
-  }
-};
+  };
 
   if (loading) {
     return (
@@ -201,29 +204,16 @@ export default function JobDetailPage() {
   if (!job) return null
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="max-w-3xl mx-auto">
-        <Button asChild variant="outline" className="mb-6">
-          <Link href="/student/dashboard">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="mr-2 h-4 w-4"
-            >
-              <path d="m15 18-6-6 6-6" />
-            </svg>
-            Back To Jobs
-          </Link>
-        </Button>
+    <div className="container mx-auto py-8 px-4 ">
+      <div className="max-w-6xl mx-auto">
 
-        <Card>
+        <Card className="bg-[#d8e6e6] text-black px-8">
+            <button className="mt-4 flex items-center gap-2 rounded-md px-3 py-2 text-[#065f46] transition-all">
+              <Link href="/student/dashboard" aria-label="Back to Dashboard">
+              <ArrowLeft className="h-10 w-10" />
+              </Link>
+            </button>
+
           <CardHeader>
             <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
               <div>
@@ -280,7 +270,7 @@ export default function JobDetailPage() {
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-medium mb-2">Contact Information</h3>
+                  <h3 className="text-lg font-medium mb-2 ">Contact Information</h3>
                   {user?.isPremium ? (
                     <div className="space-y-2">
                       <p className="flex items-center">
@@ -379,15 +369,15 @@ export default function JobDetailPage() {
                               strokeWidth="2"
                               strokeLinecap="round"
                               strokeLinejoin="round"
-                              className="h-6 w-6 mx-auto mb-2 text-primary"
+                              className="h-6 w-6 mx-auto mb-2 text-[#031d1c]"
                             >
                               <circle cx="12" cy="12" r="10" />
                               <path d="M16 16s-1.5-2-4-2-4 2-4 2" />
                               <line x1="9" x2="9.01" y1="9" y2="9" />
                               <line x1="15" x2="15.01" y1="9" y2="9" />
                             </svg>
-                            <p className="text-sm font-medium mb-2">Contact Information Blurred</p>
-                            <Button asChild size="sm" variant="outline">
+                            <p className="text-sm font-medium mb-2 text-slate-300">Contact Information Blurred</p>
+                            <Button asChild size="sm" variant="outline" className="text-slate-300">
                               <Link href="/student/profile?tab=premium">Upgrade To Premium</Link>
                             </Button>
                           </div>
@@ -415,20 +405,20 @@ export default function JobDetailPage() {
             </TabsContent>
           </Tabs>
 
-          <CardFooter>
+          <CardFooter className="justify-center items-center p-4 text-slate-300">
             {job?.externallink ? (
               <a
                 href={job.externallink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full"
+                className=""
               >
-                <Button variant={hasApplied ? "outline" : "default"}  className="w-full" onClick={handleApply}>
+                <Button variant={hasApplied ? "outline" : "default"} className="justify-center items-center p-4 text-slate-300 !bg-[#031d1c]" onClick={handleApply}>
                   {hasApplied ? "Has clicked apply" : "Apply For Job"} <ExternalLinkIcon className="ml-2 h-4 w-4" />
                 </Button>
               </a>
             ) : (
-              <Button variant={hasApplied ? "outline" : "default"}  className="w-full" onClick={() => setIsApplyDialogOpen(true)}>
+              <Button variant={hasApplied ? "outline" : "default"} className="p-4 text-slate-300" onClick={() => setIsApplyDialogOpen(true)}>
                 {hasApplied ? "Already Applied" : "Apply For Job"}
               </Button>
             )}

@@ -29,7 +29,7 @@ export default function EmployersPage() {
 
           <div className="flex justify-center gap-4">
             <button className="bg-[#FF0A0A] hover:bg-[#e5404a] border border-lime-400 text-white font-semibold py-2 px-6 rounded-full shadow-md transition">
-              Get Started Now
+              <Link href="/register/employer">Get Started Now</Link>
             </button>
             <button className="border border-[#FF0A0A] text-slate-800 bg-lime-400 hover:bg-[#f64f5910] font-semibold py-2 px-6 rounded-full shadow-md transition">
               Learn More
@@ -97,7 +97,7 @@ export default function EmployersPage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-16 bg-muted/30 rounded-lg px-6 my-12">
+      <section className="py-16 bg-transparent rounded-lg px-6 my-12">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">How ShiftLink Works for Employers</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -268,7 +268,7 @@ export default function EmployersPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-primary/10 rounded-lg px-8 my-12 text-center">
+      <section className="py-16 bg-transparent rounded-lg px-8 my-12 text-center">
         <h2 className="text-3xl font-bold mb-4">Ready to Find Your Perfect Student Employee?</h2>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
           Join thousands of businesses that have found reliable, motivated student workers through ShiftLink

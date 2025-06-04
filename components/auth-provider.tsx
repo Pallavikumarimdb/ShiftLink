@@ -57,14 +57,15 @@ const [isSubmitting, setIsSubmitting] = useState(false)
     const employerProtectedRoutes = ["/employer"]
     const adminProtectedRoutes = ["/admin"]
     const authRoutes = ["/login", "/register"]
+    const publicRoutes = ["/employers", "/jobs", "/about"]
 
     const isStudentProtected = studentProtectedRoutes.some((route) => pathname?.startsWith(route))
     const isEmployerProtected = employerProtectedRoutes.some((route) => pathname?.startsWith(route))
     const isAdminProtected = adminProtectedRoutes.some((route) => pathname?.startsWith(route))
     const isAuthRoute = authRoutes.some((route) => pathname?.startsWith(route))
+    const isPublicRoute = publicRoutes.some((route) => pathname?.startsWith(route))
 
-
-    if (!user && (isStudentProtected || isEmployerProtected || isAdminProtected)) {
+    if (!user && (isStudentProtected || isEmployerProtected || isAdminProtected) && !isPublicRoute) {
       router.push("/login")
       return
     }

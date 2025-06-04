@@ -395,14 +395,18 @@ export default function StudentRegisterPage() {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-center">
-          <div className="text-sm text-center text-muted-foreground">
+        <CardFooter className="flex flex-col items-center space-y-2">
+          <div className="text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link href="/login" className="text-primary hover:underline">
               Login
             </Link>
           </div>
+          <Button variant="outline" asChild>
+            <Link href="/register/employer">Login as Employer</Link>
+          </Button>
         </CardFooter>
+
       </Card>
     </div>
   )

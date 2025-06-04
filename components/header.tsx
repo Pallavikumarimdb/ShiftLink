@@ -56,68 +56,70 @@ export default function Header() {
               {("Jobs")}
             </Link>
             <Link href="/employers" className="text-muted-foreground hover:text-foreground transition-colors">
-              For Employers
+              Employers
             </Link>
             <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">
               About Us
             </Link>
           </nav>
         </div>
-
         <div className="flex items-center gap-8">
-
-          {isLoading ? (
-            <div className="h-10 w-20 rounded-md bg-muted animate-pulse"></div>
-          ) : user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="default" className="gap-2">
-                  {user.role === "admin" ? <Shield className="h-4 w-4" /> : <User className="h-4 w-4" />}
-                  <span className="hidden sm:inline-block">
-                    {user.isPremium && user.role === "student" ? (
-                      <span className="flex items-center">
-                        Account
-                        <span className="ml-1.5 inline-flex items-center rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900 dark:text-amber-300">
-                          Premium
+          {/* For larger screens */}
+          <div className="hidden md:flex items-center gap-2">
+            {isLoading ? (
+              <div className="h-10 w-20 rounded-md bg-muted animate-pulse"></div>
+            ) : user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="default" className="gap-2">
+                    {user.role === "admin" ? <Shield className="h-4 w-4" /> : <User className="h-4 w-4" />}
+                    <span className="hidden sm:inline-block">
+                      {user.isPremium && user.role === "student" ? (
+                        <span className="flex items-center">
+                          Account
+                          <span className="ml-1.5 inline-flex items-center rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900 dark:text-amber-300">
+                            Premium
+                          </span>
                         </span>
-                      </span>
-                    ) : user.role === "admin" ? (
-                      "Admin"
-                    ) : (
-                      (user.name ||"Profile")
-                    )}
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem className="font-medium">{user.name || user.email}</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {userLinks.map((link) => (
-                  <DropdownMenuItem key={link.href} asChild>
-                    <Link href={link.href}>{link.label}</Link>
+                      ) : user.role === "admin" ? (
+                        "Admin"
+                      ) : (
+                        user.name || "Profile"
+                      )}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem className="font-medium">{user.name || user.email}</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  {userLinks.map((link) => (
+                    <DropdownMenuItem key={link.href} asChild>
+                      <Link href={link.href}>{link.label}</Link>
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout} className="gap-2 text-destructive">
+                    <LogOut className="h-4 w-4" />
+                    <span>logout</span>
                   </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="gap-2 text-destructive">
-                  <LogOut className="h-4 w-4" />
-                  <span>logout</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <div className="hidden sm:flex items-center gap-2">
-              <Button asChild variant="outline">
-                <Link href="/login">login</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/register/student">signup</Link>
-              </Button>
-            </div>
-          )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Button asChild variant="outline">
+                  <Link href="/login">login</Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/register/student">signup</Link>
+                </Button>
+              </>
+            )}
+          </div>
 
+          {/* For small screens */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="md:hidden">
+              <Button variant="default" size="icon" className="md:hidden">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle menu</span>
               </Button>
@@ -125,10 +127,10 @@ export default function Header() {
             <SheetContent>
               <div className="flex flex-col gap-4 mt-8">
                 <Link href="/jobs" className="py-2" onClick={closeSheet}>
-                  jobs
+                  Jobs
                 </Link>
                 <Link href="/employers" className="py-2" onClick={closeSheet}>
-                  For Employers
+                  Employers
                 </Link>
                 <Link href="/about" className="py-2" onClick={closeSheet}>
                   About Us
@@ -136,7 +138,9 @@ export default function Header() {
 
                 <div className="h-px bg-border my-4" />
 
-                {user ? (
+                {isLoading ? (
+                  <div className="h-10 w-20 rounded-md bg-muted animate-pulse"></div>
+                ) : user ? (
                   <>
                     {userLinks.map((link) => (
                       <Link key={link.href} href={link.href} className="py-2" onClick={closeSheet}>
@@ -147,8 +151,8 @@ export default function Header() {
                       variant="destructive"
                       className="mt-4"
                       onClick={() => {
-                        logout()
-                        closeSheet()
+                        logout();
+                        closeSheet();
                       }}
                     >
                       logout
@@ -172,6 +176,7 @@ export default function Header() {
             </SheetContent>
           </Sheet>
         </div>
+
       </div>
     </header>
   )
